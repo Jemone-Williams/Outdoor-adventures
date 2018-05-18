@@ -1,0 +1,342 @@
+/* This has been modified to include absolute URLs, as well as findPOS and Trim*/
+
+var key = MN = MNStatus = LAStatus = LA = ""
+var listItemArray = new Array();
+var listAmount = 0;
+var locationDrop = new Array();
+var MeMDrop = new Array();
+var gInputObject;
+var hasInnerText;
+var automouseoverdiv=false;
+var autocompres = new Array();
+var autoCompLocMax = 25; //max results in autocomplete set.
+var autoCompEstMax = 100; //max results in autocomplete set.
+var autocompidx = -1; //pointer to selected in currect autocomplete. -1 == not in use else pointer in array to currently selected.
+//var autocompstyle = "cursor:pointer;background:#fff;color: #707070;width:282px;padding: 0px 2px 0px 2px;white-space:nowrap;overflow:hidden;text-decoration:none;font-size: 1.1em;";
+//var autocompselstyle = "cursor:pointer;background:#97d6f2;color:#707070;width:282px;padding: 0px 2px 0px 2px;white-space:nowrap;overflow:hidden;text-decoration:none;font-size: 1.1em;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;behavior: url(/Themes/PIE.htc);";
+var autocompstyle = "cursor:pointer;background:#fff;color: #707070;width:282px;padding: 0px 2px 0px 2px;white-space:nowrap;overflow:hidden;text-decoration:none;";
+var autocompselstyle = "cursor:pointer;background:#97d6f2;color:#707070;width:282px;padding: 0px 2px 0px 2px;white-space:nowrap;overflow:hidden;text-decoration:none;border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;behavior: url(/Themes/PIE.htc);";
+
+/*var addEvent = window.attachEvent || window.addEventListener;
+var autoevt = window.attachEvent ? 'onload' : 'load';
+addEvent(autoevt, function(){
+    hasInnerText = (document.getElementsByTagName("body")[0].innerText != undefined) ? true : false; //FireFox does not support innerText
+    var _locdiv = document.createElement('div');
+    //_locdiv.style = 'position:absolute; left:0px; top:0px;visibility:hidden;'; //Does not work in IE8
+    _locdiv.id = 'locDest';
+    _locdiv.appendChild(document.createTextNode(''));
+    document.body.appendChild(_locdiv);
+    document.getElementById('locDest').style.cssText = 'position:absolute; left:0px; top:0px;visibility:hidden;';
+	if (document.getElementById("search")!=null){
+		document.getElementById("search").onkeydown=searchkey;
+		}
+	if (document.getElementById("menusearch")!=null){
+		document.getElementById("menusearch").onkeydown=searchkey;
+		}
+    });
+*/
+act = window.setTimeout("initautocomplete()", 100);
+function initautocomplete(){
+    hasInnerText = (document.getElementsByTagName("body")[0].innerText != undefined) ? true : false; //FireFox does not support innerText
+    var _locdiv = document.createElement('div');
+    //_locdiv.style = 'position:absolute; left:0px; top:0px;visibility:hidden;'; //Does not work in IE8
+    _locdiv.id = 'locDest';
+    _locdiv.appendChild(document.createTextNode(''));
+    document.body.appendChild(_locdiv);
+    document.getElementById('locDest').style.cssText = 'position:absolute; left:0px; top:0px;visibility:hidden;';
+    document.getElementById('locDest').onmouseover = function(){automouseoverdiv=true;};
+    document.getElementById('locDest').onmouseout = function(){automouseoverdiv=false;};
+	if (document.getElementById("search")!=null){
+		document.getElementById("search").onkeydown=searchkey;
+		}
+	if (document.getElementById("menusearch")!=null){
+		document.getElementById("menusearch").onkeydown=searchkey;
+		gInputObject=document.getElementById("menusearch");
+		}
+    }
+function searchkey(e){
+	e = e || event
+	if (e.keyCode == 13) {
+	    e.preventDefault ? e.preventDefault() : (e.returnValue = false)
+        }	
+	}
+function GetMembers(evt, autoBoxValue) {
+    gInputObject = autoBoxValue;
+    if (autoBoxValue.value.Trim().length > 2) {
+        charCode = (evt.which) ? evt.which : event.keyCode;
+        if (charCode == 40 || charCode == 38 || charCode == 13) //38 = Up arrow 40 = down arrow 13 = enter
+        {
+            ListNav(charCode);
+        }
+        else{
+            if (key != autoBoxValue.value.Trim().slice(0, 3).toLowerCase()){
+                
+
+                key = removeChar(autoBoxValue.value).Trim().slice(0, 3).toLowerCase();
+                removeElementById('MembersArrayScript')
+                removeElementById('LocationArrayScript')
+
+                document.getElementById('locDest').innerHTML = _js = MNStatus = LAStatus = MN = "";
+                document.getElementById('locDest').style.visibility = 'hidden';
+                if (autoBoxValue.id != "search"){
+                    _js = document.createElement('script');
+                    _js.type = 'text/javascript';
+                    _js.src = "https://www.sleeping-out.co.za/Ascripts/MN.js?Keyword=" + key;
+                    _js.id = "MembersArrayScript";
+                    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(_js);
+                }
+                _js = document.createElement('script');
+                _js.type = 'text/javascript';
+                _js.src = "https://www.sleeping-out.co.za/Ascripts/loc.js?Keyword=" + key +"&LanguageID="+LanguageID;
+                _js.id = "LocationArrayScript";
+                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(_js);
+
+                FilterResults();
+            }
+            else{
+                FilterResults();
+            }
+        }
+    }
+    else{
+        if (key != "") {
+            removeElementById('MembersArrayScript')
+            removeElementById('LocationArrayScript')
+            document.getElementById('locDest').style.visibility = 'hidden';
+            document.getElementById('locDest').innerHTML = _js = MNStatus = LAStatus = MN = key = gInputObject = "";
+        }
+    }
+}
+
+function FilterResults(){
+    listItemArray = [];
+    listAmount = 0;
+    autocompidx = -1;
+    locationDrop = [];
+	MeMDrop = [];
+	
+    if ((gInputObject.id != "search") && (key != "")&&(MNStatus == "" || LAStatus == "")){
+        _FilterResults = window.setTimeout('FilterResults()', 100);
+    }
+    else if ((gInputObject.id == "search") && (key != "")&&(LAStatus == "")){
+        _FilterResults = window.setTimeout('FilterResults()', 100);
+    }
+    else{
+        result = "";
+        var autoComVal = removeChar(gInputObject.value).Trim().toLowerCase();
+
+        var reg = new RegExp("(" + autoComVal + ")", "i");
+        
+        searchloop1:
+            if (LA.length > 0 && autoComVal != "")
+            {
+                var locationAmount = 0;
+                if (gInputObject.id != "search") {
+                    result += "<strong class='dropHeading'>Locations</strong><br />";
+                }
+                for (var x = 0; x < LA.length; x++)
+                {
+                    if (LA[x][2].search(reg) != -1)
+                    {
+                        if (gInputObject.id != "search")
+                        {
+                            result = result + '<div onclick="onMouseClickautocomp();" id="autocomplistitem' + listAmount + '" onmouseover="onMouseOverautocomp(' + listAmount + ');" style="' + autocompstyle + '">' + LA[x][2].toString().replace(reg, "<strong>$1</strong>") + '</div>';
+                        }
+                        else
+                        {
+                            result = result + '<div onclick="onMouseClickautocomp();" id="autocomplistitem' + listAmount + '" onmouseover="onMouseOverautocomp(' + listAmount + ')" style="' + autocompstyle + '">' + LA[x][2].toString().replace(reg, "<strong>$1</strong>") + '</div>';
+                            if (locationAmount == 0)
+                            {
+                                document.InputForm.LocationID.value = LA[x][0].toString();
+                            }
+                        }
+                        listItemArray[listItemArray.length] = "autocomplistitem" + listAmount;
+                        locationDrop[listAmount] = LA[x][0];
+
+                        listAmount++;
+                        locationAmount++;
+                        if (locationAmount >= autoCompLocMax) {break searchloop1;}
+                    }
+                }
+
+                if (locationAmount == 0)
+                {
+                    result += "<i>No Results</i><br/>"
+                }
+            }
+            else {
+                result += "<strong class='dropHeading'>Locations</strong><br /><i>No Results</i><br/>";
+            }
+
+        if (gInputObject.id != 'search')
+        {
+            result = result + "<br/>";
+
+            searchloop2:
+            if (MN.length > 0 && autoComVal != "")
+            {
+                var estAmount = 0;
+                result += "<strong class='dropHeading'>Accommodations</strong><br />"
+
+                for (var x = 0; x < MN.length; x++)
+                {
+                    if (MN[x][0].search(reg) != -1)
+                    {
+						result = result + '<div onclick="onMouseClickautocomp();" id="autocomplistitem' + listAmount + '" onmouseover="onMouseOverautocomp(' + listAmount + ')" style="' + autocompstyle + '">' + MN[x][0].toString().replace(reg, "<strong>$1</strong>") + '</div></a>';
+                        listItemArray[listItemArray.length] = "autocomplistitem" + listAmount;
+						MeMDrop[listAmount] = MN[x][1];
+                        listAmount++;
+                        estAmount++;
+                        if (estAmount >= autoCompEstMax) { break searchloop2; }
+                    }
+                }
+                if (estAmount == 0)
+                {
+                    result += "<i>No Results</i><br/>"
+                }
+            }
+            else
+            {
+                result += "<br/><strong class='dropHeading'>Accommodations</strong><br /><i>No Results</i><br/>";
+            }
+        }
+        document.getElementById('locDest').innerHTML = result;
+
+        docheight = window.innerHeight || self.innerHeight || (document.documentElement && document.documentElement.clientHeight) || 592; //default to height of 592 if not found.
+        Pos = findPos(gInputObject);
+        automaxheight = docheight - Pos[1] - gInputObject.offsetHeight - 20;
+
+        document.getElementById('locDest').style.cssText = 'z-index=1;position:absolute;left:' + Pos[0] + 'px;top:' + (Pos[1] + gInputObject.offsetHeight) + 'px;visibility:visible;max-height:' + automaxheight + 'px;';
+    }
+}
+
+function ListNav(charCode){
+    if (charCode == 38 && listItemArray.length > 0)
+    {
+        if (autocompidx >= 0){
+            document.getElementById(listItemArray[autocompidx]).style.cssText = autocompstyle;
+        }
+        autocompidx--;
+        if (autocompidx < 0){
+            autocompidx = listItemArray.length - 1;
+        }
+        document.getElementById(listItemArray[autocompidx]).style.cssText = autocompselstyle;
+        if (locationDrop.length > autocompidx && typeof (document.InputForm) != "undefined") {
+            document.InputForm.LocationID.value = locationDrop[autocompidx];
+        }
+    } // up arrow
+    else if (charCode == 40 && listItemArray.length > 0)
+    {
+        if (autocompidx >= 0){
+            document.getElementById(listItemArray[autocompidx]).style.cssText = autocompstyle;
+        }
+        autocompidx++;
+        if (autocompidx > listItemArray.length - 1){
+            autocompidx = 0;
+        }
+        document.getElementById(listItemArray[autocompidx]).style.cssText = autocompselstyle;
+        if (locationDrop.length > autocompidx && typeof (document.InputForm) != "undefined") {
+            document.InputForm.LocationID.value = locationDrop[autocompidx];
+        }
+    } // down arrow
+    if (charCode == 13 && listItemArray.length > 0) {
+		if(!hasInnerText){selectedtxt = document.getElementById(listItemArray[autocompidx]).textContent;}
+		else{selectedtxt = document.getElementById(listItemArray[autocompidx]).innerText;}
+        if (gInputObject.id == "menusearch") {
+            document.getElementById('menusearch').value = selectedtxt;
+            if (locationDrop.length > autocompidx) {
+                document.location='https://www.sleeping-out.co.za/accommodation/'+(selectedtxt.replace(/[\///&,\'\"\)\(-]/g,"").replace(/  /g," ")).replace(/ /g,"-")+'/'+locationDrop[autocompidx]+'-0-'+LanguageID+'-1';
+            }
+            else {
+                document.location = 'https://www.sleeping-out.co.za/md/'+(selectedtxt.replace(/<[^>]*>/g,"").replace(/[^\w\d ]/g,"").replace(/  /g," ")).replace(/ /g,"-")+'/'+MeMDrop[autocompidx].toString();
+            }
+        }
+
+        if (gInputObject.id == "search") {
+			document.getElementById('search').value = selectedtxt;
+        }
+	document.getElementById('locDest').style.visibility = 'hidden';
+	autocompidx = -1;
+    listAmount = 0;
+    }//Enter
+}
+function removeElementById(id){
+    if (document.getElementById(id) != null) {
+        (elem = document.getElementById(id)).parentNode.removeChild(elem);
+    } 
+    return;
+}
+function onMouseClickautocomp(){
+	if(!hasInnerText){selectedtxt = document.getElementById(listItemArray[autocompidx]).textContent;}
+	else{selectedtxt = document.getElementById(listItemArray[autocompidx]).innerText;}
+	if (gInputObject.id == "menusearch") {
+		document.getElementById('menusearch').value = selectedtxt;
+		if (locationDrop.length > autocompidx) {
+			document.location='https://www.sleeping-out.co.za/accommodation/'+(selectedtxt.replace(/[\///&,\'\"\)\(-]/g,"").replace(/  /g," ")).replace(/ /g,"-")+'/'+locationDrop[autocompidx]+'-0-'+LanguageID+'-1';
+			}
+		else {
+			document.location = 'https://www.sleeping-out.co.za/md/'+(selectedtxt.replace(/<[^>]*>/g,"").replace(/[^\w\d ]/g,"").replace(/  /g," ")).replace(/ /g,"-")+'/'+MeMDrop[autocompidx].toString();
+			}
+		}
+	if (gInputObject.id == "search") {
+		document.getElementById('search').value = selectedtxt;
+		}
+	//gInputObject.blur();
+	document.getElementById('locDest').style.visibility = 'hidden';
+	autocompidx = -1;
+    listAmount = 0;
+	}
+function onMouseOverautocomp(id){
+	if (autocompidx >= 0){
+		document.getElementById(listItemArray[autocompidx]).style.cssText = autocompstyle;
+	}
+	autocompidx = id;
+	document.getElementById(listItemArray[autocompidx]).style.cssText = autocompselstyle;
+	if (locationDrop.length > autocompidx && gInputObject.id == "search") {
+		document.InputForm.LocationID.value = locationDrop[autocompidx];
+	}
+}
+function onBlurautocomp() {
+    if (autocompidx > -1 && listAmount>0 && gInputObject.id == "search"){
+		onMouseClickautocomp();
+        }
+    else if (gInputObject.id == "search" && listAmount>0){
+		autocompidx=0;
+		onMouseClickautocomp();		
+		}
+	else if (gInputObject.id == "search"){
+		document.InputForm.LocationID.value = "";
+		document.getElementById('search').value = sAll;
+		}
+    else if (autocompidx > -1 && listAmount>0 && gInputObject.id == "menusearch" && !automouseoverdiv){
+		onMouseClickautocomp();
+		}
+    else if (gInputObject.id == "menusearch" && !automouseoverdiv){
+        document.getElementById('menusearch').value = MenuSearchDefault;
+        }
+    if (!automouseoverdiv){
+		document.getElementById('locDest').style.visibility = 'hidden'; 
+	    autocompidx = -1;
+	    listAmount = 0;
+		}
+    }
+
+function removeChar(keyVal){
+    keyVal = keyVal.replace(/[^\w'\. ]/g, "");
+    return keyVal;
+}
+function findPos(x){
+	var curleft = curtop = 0;
+	if (x.offsetParent) {
+		curleft = x.offsetLeft
+		curtop = x.offsetTop
+		while (x = x.offsetParent) {
+			curleft += x.offsetLeft
+			curtop += x.offsetTop
+			}
+		}
+	return [curleft,curtop];
+	}
+if (!String.prototype.lTrim){String.prototype.lTrim=function(){return this.replace(/^\s*/,'');}}
+if (!String.prototype.rTrim){String.prototype.rTrim=function(){return this.replace(/\s*$/,'');}}
+if (!String.prototype.Trim){String.prototype.Trim=function(){return this.lTrim().rTrim();}}
