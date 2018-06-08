@@ -1,1 +1,0 @@
-window.nightjar = window.nightjar || {}; nightjar.session = {"favourites":[],"routes":null,"curRouteIndex":-1,"showRoute":true,"readDestinationHelp":false,"showAcc":true,"showAtt":false,"routeHash":"","username":""};

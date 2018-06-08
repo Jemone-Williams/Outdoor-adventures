@@ -1,0 +1,290 @@
+@font-face {
+  font-family: denseFont;
+  src: url("../fonts/roboto.light.ttf");
+}
+
+body {
+ display: grid;
+ grid-template-areas:
+ "header header header header"
+ "section section section section"
+ "footer footer footer footer";
+ grid-template-columns: repeat(4, 1fr);
+ grid-template-rows: repeat(4, 1fr);
+ height: 100vh;
+ font-family: 'denseFont';
+ margin: 0;
+ padding: 0;
+}
+
+.dropdown {
+  float: left;
+  overflow: hidden; }
+  .dropdown .dropbtn {
+    border: none;
+    outline: none;
+    color: none;
+    padding: 2px 0px;
+    background-color: inherit;
+    margin: 0; }
+  .dropdown:hover .dropdown-content {
+    display: block; }
+
+.dropdown-content {
+  text-align: center;
+  display: none;
+  position: absolute;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  background-color: rgba(128, 128, 128, 0.8);
+  z-index: 1;
+  margin-top: 6px;}
+  .dropdown-content a {
+    float: none;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    text-align: left; }
+    .dropdown-content a:hover {
+      background-color: #ddd; }
+
+header{
+  background-color: #222;
+  background-image: url(../images/Vagnini_091316_0373_Main_lg.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  animation: slide 30s infinite;
+}
+
+@keyframes slide {
+  25%{
+    background: url(../images/rock8.jpg);
+  }
+  50%{
+    background: url(../images/samantha-sophia-34224-unsplash.jpg);
+  }
+  75%{
+    background: url(../images/taylor-davis-599089-unsplash.jpg);
+  }
+  100%{
+    background: url(../images/image-3.jpg);
+  }
+}
+
+
+h1 {
+  font: bold 65px/60px Helvetica, Arial, Sans-serif;
+  text-align: center;
+  color: #eee;
+  text-shadow: 0px 6px 12px #333;
+}
+
+h2 {
+  text-align: center;
+  background: white;
+}
+
+h5{
+  margin-left: 40px;
+}
+
+p {
+  margin-left: 40px;
+  margin-right: 50px;
+}
+
+#header {
+    grid-area: header;
+    padding: 14%;
+}
+
+#section {
+    grid-area: section;
+    background-image: url(../images/manuel-inglez-48562-unsplash.jpg);
+    background-size: cover;
+    background-position: center;
+}
+
+#footer {
+  grid-area: footer;
+  background-color: gray;
+  margin-bottom: -15%;
+}
+
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  padding: 10px 100px;
+  box-sizing: border-box;
+  z-index: 1000;
+  background-color: rgba(128, 128, 128, 0.8);
+}
+
+nav .logo {
+  height: 70px;
+  width: 70px;
+  float: left;
+}
+
+nav ul {
+  list-style: none;
+  float: right;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+nav ul li {
+  list-style: none;
+}
+
+nav ul li a{
+  line-height: 80px;
+  color: #151515;
+  padding: 12px 30px;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: 20px;
+}
+
+
+nav ul li a.active {
+  background: #F2472F;
+  color: #fff;
+  border-radius: 6px;
+}
+
+.png{
+  margin-left: 40px;
+  height: 46px;
+  width: 46px;
+}
+
+.gallery {
+  margin: 10px 50px;
+  border: 2px solid white;
+  opacity: 1;
+}
+
+.gallery img {
+  margin-left: 47px;
+  height: 328.13px;
+  width: 355px;
+  padding: 24px;
+  /* filter: grayscale(100%); */
+  transition: 1s;
+}
+
+.gallery img:hover {
+  filter: grayscale(0);
+  transform: scale(1.1);
+}
+
+.pulse:hover,
+.pulse:focus {
+  animation: pulse 1s;
+  box-shadow: 0 0 0 2em rgba(224, 10, 10, 0);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--hover);
+  }
+}
+
+.pulse {
+  --color: #ef6eae;
+  --hover: #ef8f6e;
+}
+
+button {
+  color: var(--color);
+  transition: 0.25s;
+}
+
+button:hover, button:focus {
+  border-color: var(--hover);
+  color: #fff;
+}
+
+
+button {
+  background: none;
+  border: 2px solid;
+  font: inherit;
+  line-height: 1;
+  margin: 0.5em;
+  padding: 1em 2em;
+}
+
+/* mobile 320 */
+@media only screen and (max-width:320px){
+
+  h1 {
+    font-size: 110%;
+  }
+
+h2 {
+  font-size: 20px;
+  margin-left: 45px;
+}
+
+nav{
+  margin-top: -20px;
+  width: 100%;
+  font-size:5px;
+  padding: 0;
+}
+
+nav ul li a{
+  padding: 10px;
+}
+
+nav .logo {
+    height: 0;
+    width: 0;
+    margin: 0;
+}
+
+li {
+    font-size: 10px;
+}
+
+  .gallery {
+    margin-left: 5px;
+  }
+
+  .gallery img {
+    height: 228.13px;
+    width: 220px;
+    margin-left: 25px;
+  }
+
+ h3 {
+    font-size: 20px;
+    margin-left: 70%;
+  }
+
+p {
+  font-size: 10px;
+}
+
+  .png{
+    margin-left: 56px;
+    height: 30px;
+    width: 30px;
+  }
+
+  .gallery {
+    border: none;
+  }
+
+  .dropdown-content {
+    min-width: 0;
+    margin-top: 0;}
+
+}
